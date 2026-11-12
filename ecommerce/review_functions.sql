@@ -48,3 +48,42 @@ BEGIN
     RETURN v_review_id;
 END;
 $$;
+
+---UPDATE_REVIEW FUNCTION----
+CREATE OR REPLACE FUNCTION update_review(
+    p_member_id INTEGER,
+    p_review_id INTEGER,
+    p_rating INTEGER,
+    p_review_text TEXT
+)
+RETURNS INTEGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_owner_id INTEGER;
+BEGIN
+    SELECT member_id INTO v_owner_id
+    FROM review
+    WHERE id = p_review_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Review does not exist';
+    END IF;
+
+    IF v_owner_id <> p_member_id THEN
+        RAISE EXCEPTION 'You can only update your own reviews';
+    END IF;
+
+    IF p_rating IS NULL OR p_rating < 1 OR p_rating > 5 THEN
+        RAISE EXCEPTION 'Rating must be between 1 and 5';
+    END IF;
+
+    UPDATE review
+    SET rating = p_rating,
+        review_text = p_review_text,
+        last_updated = NOW()
+    WHERE id = p_review_id;
+
+    RETURN p_review_id;
+END;
+$$;
