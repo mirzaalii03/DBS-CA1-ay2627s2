@@ -119,3 +119,32 @@ BEGIN
     RETURN p_review_id;
 END;
 $$;
+
+---GET_REVIEWS FUNCTION----
+CREATE OR REPLACE FUNCTION get_reviews(
+    p_member_id INTEGER
+)
+RETURNS TABLE (
+    review_id INTEGER,
+    product_id INTEGER,
+    product_name VARCHAR,
+    rating INTEGER,
+    review_text TEXT,
+    last_updated TIMESTAMP
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM member m WHERE m.id = p_member_id) THEN
+        RAISE EXCEPTION 'Member does not exist';
+    END IF;
+
+    RETURN QUERY
+    SELECT r.id, r.product_id, p.name, r.rating, r.review_text, r.last_updated
+    FROM review r
+    JOIN product p ON p.id = r.product_id
+    WHERE r.member_id = p_member_id
+    ORDER BY r.last_updated DESC;
+END;
+$$;
+
