@@ -87,3 +87,35 @@ BEGIN
     RETURN p_review_id;
 END;
 $$;
+
+
+---DELETE_REVIEW FUNCTION---
+
+CREATE OR REPLACE FUNCTION delete_review(
+    p_member_id INTEGER,
+    p_review_id INTEGER
+)
+RETURNS INTEGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_owner_id INTEGER;
+BEGIN
+    SELECT member_id INTO v_owner_id
+    FROM review
+    WHERE id = p_review_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Review does not exist';
+    END IF;
+
+    IF v_owner_id <> p_member_id THEN
+        RAISE EXCEPTION 'You can only delete your own reviews';
+    END IF;
+
+    DELETE FROM review
+    WHERE id = p_review_id;
+
+    RETURN p_review_id;
+END;
+$$;
