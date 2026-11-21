@@ -55,3 +55,51 @@ BEGIN
 END;
 $$;
 
+---GET_COMMENTS FUNCTION----
+CREATE OR REPLACE FUNCTION get_comments(
+    p_review_id INTEGER
+)
+RETURNS TABLE (
+    comment_id INTEGER,
+    review_id INTEGER,
+    member_id INTEGER,
+    username VARCHAR,
+    parent_comment_id INTEGER,
+    comment_text TEXT,
+    created_at TIMESTAMP,
+    depth INTEGER
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM review r WHERE r.id = p_review_id) THEN
+        RAISE EXCEPTION 'Review does not exist';
+    END IF;
+
+    RETURN QUERY
+    WITH RECURSIVE thread AS (
+        SELECT c.id, c.review_id, c.member_id, c.parent_comment_id,
+               c.comment_text, c.created_at,
+               0 AS depth,
+               ARRAY[c.id] AS path
+        FROM comment c
+        WHERE c.review_id = p_review_id
+          AND c.parent_comment_id IS NULL
+
+        UNION ALL
+
+        SELECT c.id, c.review_id, c.member_id, c.parent_comment_id,
+               c.comment_text, c.created_at,
+               t.depth + 1,
+               t.path || c.id
+        FROM comment c
+        JOIN thread t ON c.parent_comment_id = t.id
+    )
+    SELECT t.id, t.review_id, t.member_id, m.username, t.parent_comment_id,
+           t.comment_text, t.created_at, t.depth
+    FROM thread t
+    JOIN member m ON m.id = t.member_id
+    ORDER BY t.path;
+END;
+$$;
+
