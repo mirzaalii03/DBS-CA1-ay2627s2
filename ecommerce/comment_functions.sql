@@ -103,3 +103,32 @@ BEGIN
 END;
 $$;
 
+---DELETE_COMMENT FUNCTION----
+CREATE OR REPLACE FUNCTION delete_comment(
+    p_member_id INTEGER,
+    p_comment_id INTEGER
+)
+RETURNS INTEGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_owner_id INTEGER;
+BEGIN
+    SELECT member_id INTO v_owner_id
+    FROM comment
+    WHERE id = p_comment_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Comment does not exist';
+    END IF;
+
+    IF v_owner_id <> p_member_id THEN
+        RAISE EXCEPTION 'You can only delete your own comments';
+    END IF;
+
+    DELETE FROM comment
+    WHERE id = p_comment_id;
+
+    RETURN p_comment_id;
+END;
+$$;
