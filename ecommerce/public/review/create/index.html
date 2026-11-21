@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Review - HydroMax Shop</title>
+  <link rel="stylesheet" href="/review/create/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <span class="brand">HydroMax Shop</span>
+    <div class="nav-right">
+      <a href="/product/retrieve">Products</a>
+      <a href="/review/retrieve/all">My Reviews</a>
+      <span>Member: <strong id="navUsername">User</strong></span>
+      <button type="button" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="card">
+      <h1>Create Review for <span id="productName">this product</span></h1>
+
+      <form id="reviewForm">
+        <div class="field">
+          <label for="productId">Product Id</label>
+          <input type="text" id="productId" readonly />
+        </div>
+        <div class="field">
+          <label for="rating">Rating (1 to 5)</label>
+          <input type="text" id="rating" inputmode="numeric" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="reviewText">Review Text</label>
+          <textarea id="reviewText" rows="4"></textarea>
+        </div>
+        <button type="submit" class="btn">Create</button>
+      </form>
+
+      <div id="message" class="message"></div>
+    </div>
+  </main>
+
+  <script src="/review/create/script.js"></script>
+</body>
+</html>
+
